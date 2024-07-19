@@ -61,7 +61,7 @@ class EventsModels {
       creatorId: data['event-creatorid'] ?? '',
       name: data['event-name'] ?? '',
       time: data['event-time'] ?? Timestamp.now(),
-      geoPoint: data['event-geoPoint'] ?? GeoPoint(0, 0),
+      geoPoint: data['event-geoPoint'] ?? const GeoPoint(0, 0),
       description: data['event-description'] ?? '',
       imageUrl: data['event-imageUrl'] ?? '',
     );

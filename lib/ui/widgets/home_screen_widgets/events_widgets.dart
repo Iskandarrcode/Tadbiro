@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class EventsWidgets extends StatefulWidget {
-  const EventsWidgets({super.key});
+  final int index;
+  const EventsWidgets({super.key, required this.index});
 
   @override
   State<EventsWidgets> createState() => _EventsWidgetsState();
@@ -37,85 +38,106 @@ class _EventsWidgetsState extends State<EventsWidgets> {
               );
             }
 
-            // Assuming you want to display the first event for now
-            var eventDoc = snapshot.data!.docs.first;
+            var eventDoc = snapshot.data!.docs[widget.index];
             var eventData = EventsModels.fromQuerySnapshot(eventDoc);
+            GeoPoint geoPoint = eventData.geoPoint;
+            // eventsList.add(eventData);
 
-            return Container(
-              padding: const EdgeInsets.all(5),
-              height: 85,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: DecorationImage(
-                        image: NetworkImage(eventData.imageUrl),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
+            return FutureBuilder<String>(
+              future: eventServices.getAddressFromLatLng(
+                  geoPoint.latitude, geoPoint.longitude),
+              builder: (context, addressSnapshot) {
+                if (addressSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+
+                String address = addressSnapshot.data ?? 'Adres mavjud emas';
+
+                return Container(
+                  padding: const EdgeInsets.all(5),
+                  height: 85,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey),
                   ),
-                  const SizedBox(width: 15),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        eventData.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: DecorationImage(
+                            image: NetworkImage(eventData.imageUrl),
+                            fit: BoxFit.fill,
+                          ),
                         ),
                       ),
-                      Text(
-                        '${eventData.time.toDate()}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Row(
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.location_on_rounded,
-                            color: Colors.grey.shade500,
-                            size: 20,
+                          Text(
+                            eventData.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
-                            eventData.description,
+                            '${eventData.time.toDate()}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
                             ),
                           ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                color: Colors.grey.shade500,
+                                size: 20,
+                              ),
+                              SizedBox(
+                                width: 155,
+                                child: Text(
+                                  address,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
+                      ),
+                      BlocBuilder<FavoriteBloc, FavoriteState>(
+                        builder: (context, state) {
+                          return IconButton(
+                            onPressed: () {
+                              context
+                                  .read<FavoriteBloc>()
+                                  .add(FavoriteEvent.toggle);
+                            },
+                            icon: Icon(
+                              state.isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color:
+                                  state.isFavorite ? Colors.red : Colors.grey,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
-                  BlocBuilder<FavoriteBloc, FavoriteState>(
-                    builder: (context, state) {
-                      return IconButton(
-                        onPressed: () {
-                          context.read<FavoriteBloc>().add(FavoriteEvent.toggle);
-                        },
-                        icon: Icon(
-                          state.isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: state.isFavorite ? Colors.red : Colors.grey,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         ),

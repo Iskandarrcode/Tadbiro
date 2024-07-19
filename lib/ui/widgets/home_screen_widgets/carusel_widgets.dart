@@ -1,11 +1,14 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exam4/logic/blocs/favorite_bloc/favorite_bloc.dart';
 import 'package:exam4/logic/blocs/favorite_bloc/favorite_state.dart';
+import 'package:exam4/services/event_firebase_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CaruselWidgets extends StatelessWidget {
-  const CaruselWidgets({super.key});
+ CaruselWidgets({super.key});
+  final eventServices = EventFirebaseServices();
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +95,17 @@ class CaruselWidgets extends StatelessWidget {
                             ),
                           );
                         },
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 20,
+                      left: 10,
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: eventServices.getEvents(),
+                        builder: (context, snapshot) {
+                          
+                          return Text("Descriptions");
+                        }
                       ),
                     ),
                   ],

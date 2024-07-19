@@ -1,6 +1,7 @@
 import 'package:exam4/core/app.dart';
 import 'package:exam4/logic/blocs/auth_bloc/auth_bloc.dart';
 import 'package:exam4/logic/blocs/favorite_bloc/favorite_bloc.dart';
+import 'package:exam4/logic/blocs/theme_bloc/theme_bloc.dart';
 import 'package:exam4/services/firebase_auth_http_services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,9 @@ void main() async {
         ),
         BlocProvider<FavoriteBloc>(
           create: (context) => FavoriteBloc(),
+        ),
+        BlocProvider<ThemeBloc>(
+          create: (context) => ThemeBloc(),
         ),
       ],
       child: const MyApp(),

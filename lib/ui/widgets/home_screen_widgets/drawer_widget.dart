@@ -1,8 +1,11 @@
 import 'package:exam4/data/models/user_model.dart';
 import 'package:exam4/logic/blocs/auth_bloc/auth_bloc.dart';
 import 'package:exam4/logic/blocs/auth_bloc/auth_events.dart';
+import 'package:exam4/logic/blocs/theme_bloc/theme_bloc.dart';
+import 'package:exam4/logic/blocs/theme_bloc/theme_event.dart';
 import 'package:exam4/services/user_firebase_services.dart';
 import 'package:exam4/ui/screens/my_events_screen/my_event_screen.dart';
+import 'package:exam4/ui/screens/profile_screen/profile_screen.dart';
 import 'package:exam4/ui/widgets/home_screen_widgets/menu_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -69,9 +72,8 @@ class DrawerWidget extends StatelessWidget {
                             ),
                             Text(
                               userData.email,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade800,
                               ),
                             ),
                           ],
@@ -102,7 +104,13 @@ class DrawerWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   ZoomTapAnimation(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return const ProfileScreen();
+                        },
+                      ));
+                    },
                     child: const ProfileInfoWidget(
                       icons: Icons.manage_accounts_outlined,
                       text1: "Profil Ma'lumotlari",
@@ -118,7 +126,9 @@ class DrawerWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   ZoomTapAnimation(
-                    onTap: () {},
+                    onTap: () {
+                      context.read<ThemeBloc>().add(ToggleThemeEvent());
+                    },
                     child: const ProfileInfoWidget(
                       icons: Icons.wb_sunny_outlined,
                       text1: "Tungi/kunduzgi holat",

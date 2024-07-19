@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exam4/services/event_firebase_services.dart';
 import 'package:exam4/services/location_services.dart';
-import 'package:exam4/services/sharedPreferences_services.dart';
 import 'package:exam4/ui/widgets/text_form_fild_widget.dart';
 import 'package:exam4/utils/app_function.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -33,7 +33,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   late YandexMapController mapController;
 
-  final _searchController = TextEditingController();
   List<MapObject>? polylines;
   List<PlacemarkMapObject> makers = [];
 
@@ -78,9 +77,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
           ),
         ),
       );
-    } else {
-      // Handle case where location is not available
-      print("Current location not available");
     }
   }
 
@@ -89,7 +85,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         _dateTime != null &&
         _timeOfDay != null &&
         location != null) {
-      final String userID = await SharedPreferencesServices().getUserId();
+      final String userID = FirebaseAuth.instance.currentUser!.uid;
       await uploadImage();
 
       try {
@@ -107,6 +103,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
           Navigator.of(context).pop();
         }
       } catch (e) {
+        // ignore: avoid_print
         print("Shared Preference ga saqlashda xatolik");
       }
     }
@@ -130,8 +127,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
   }
 
   Future<void> uploadImage() async {
-    if (_imageFile == null) return;
-
     try {
       final storageRef = FirebaseStorage.instance
           .ref()
@@ -142,25 +137,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
       final imageUrl = await snapshot.ref.getDownloadURL();
       imageUrlController.text = imageUrl;
     } catch (e) {
+      // ignore: avoid_print
       print('Imgeni Yuklashda xatolik: $e');
     }
-  }
-
-  Future<SuggestSessionResult> _suggest() async {
-    final resultWithSession = await YandexSuggest.getSuggestions(
-      text: _searchController.text,
-      boundingBox: const BoundingBox(
-        northEast: Point(latitude: 56.0421, longitude: 38.0284),
-        southWest: Point(latitude: 55.5143, longitude: 37.24841),
-      ),
-      suggestOptions: const SuggestOptions(
-        suggestType: SuggestType.geo,
-        suggestWords: true,
-        userPosition: Point(latitude: 56.0321, longitude: 38),
-      ),
-    );
-
-    return await resultWithSession.$2;
   }
 
   Future<void> _requestLocation() async {
@@ -175,6 +154,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         setState(() {});
       }
     } else {
+      // ignore: avoid_print
       print("Location permissions not granted");
     }
   }
@@ -306,19 +286,20 @@ class _AddEventScreenState extends State<AddEventScreen> {
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                  backgroundColor: Color.fromARGB(163, 0, 0, 0),
+                                  backgroundColor:
+                                      const Color.fromARGB(163, 0, 0, 0),
                                   title: Padding(
                                     padding: const EdgeInsets.all(50),
                                     child: Container(
                                       width: 150,
-                                      height: 150,
+                                      height: 130,
                                       decoration: BoxDecoration(
                                         borderRadius:
                                             BorderRadius.circular(100),
                                         color: const Color.fromARGB(
                                             138, 27, 35, 191),
                                       ),
-                                      child: Center(
+                                      child: const Center(
                                         child: Icon(
                                           Icons.check,
                                           size: 80,
@@ -330,7 +311,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
                                 );
                               },
                             );
-                            print(location);
                           },
                           onMapCreated: onMapCreated,
                           onCameraPositionChanged: onCameraPositionChanged,
